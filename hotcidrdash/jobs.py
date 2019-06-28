@@ -1,8 +1,9 @@
+from celery import Celery
+from crontab import CronTab
 from hotcidrdash import app
 from hotcidrdash import db
 from hotcidrdash import util
-from celery import Celery
-from crontab import CronTab
+
 import csv
 import datetime
 import flask
@@ -10,16 +11,20 @@ import json
 import subprocess
 import threading
 import time
+
 try:
     import queue
 except ImportError:
     import Queue as queue
 
+
 def make_celery(app):
     celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'])
     TaskBase = celery.Task
+
     class ContextTask(TaskBase):
         abstract = True
+
         def __call__(self, *args, **kwargs):
             with app.app_context():
                 return TaskBase.__call__(self, *args, **kwargs)
@@ -32,6 +37,7 @@ app.config.update(
 )
 app.user_options = {'preload': False}
 celery = make_celery(app)
+
 
 def schedule_apply(config):
     cmd = 'curl %s' % flask.url_for('apply', slug=config.slug, _external='127.0.0.1:5000')
@@ -52,12 +58,14 @@ def schedule_apply(config):
 
     cron.write()
 
+
 def run_apply(config, title="hc-apply"):
     entry = db.ApplyJob(config, title, "Waiting in queue")
     db.sql.session.add(entry)
     db.sql.session.commit()
     apply_runner.delay(entry.id)
     return entry.id
+
 
 def run_audit(config, start=None, end=None):
     parsed_start = util.parsedatestamp(start)
@@ -76,6 +84,7 @@ def run_audit(config, start=None, end=None):
     db.sql.session.commit()
     audit_runner.delay(entry.id)
     return entry.id
+
 
 def apply_helper(command, entry, s="hc-apply complete against "):
     entry.summary = "Job started"
@@ -100,6 +109,7 @@ def apply_helper(command, entry, s="hc-apply complete against "):
     entry.end_date = datetime.datetime.now()
     db.sql.session.commit()
 
+
 @celery.task()
 def apply_runner(entry_id):
     # TODO: lock task such that only one can be run at a time
@@ -113,6 +123,7 @@ def apply_runner(entry_id):
     if entry.config.expected_hash:
         cmd += ['--expected', entry.config.expected_hash]
     apply_helper(cmd, entry)
+
 
 def audit_helper(cmd, entry):
     entry.summary = "Audit started"
@@ -183,6 +194,7 @@ def audit_helper(cmd, entry):
     entry.end_date = datetime.datetime.now()
 
     db.sql.session.commit()
+
 
 @celery.task()
 def audit_runner(entry_id):

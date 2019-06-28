@@ -1,12 +1,12 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
-    name='HotCIDR Dashboard',
+    name='hotcidr-dash',
     version='0.1.0',
-    author='ViaSat',
+    author='',
     author_email='stephan.kemper@viasat.com',
     packages=['hotcidrdash'],
-    license='LICENSE.txt',
+    license='Apache License 2.0',
     description="Web Dashboard for HotCIDR",
     install_requires=[
         "Flask >= 0.10.1",
@@ -20,5 +20,6 @@ setup(
         "python-crontab >= 1.8.1",
         "croniter >= 0.3.5",
         "python-ldap >= 2.4.16",
+        "celery >= 3.1.18"
     ],
 )

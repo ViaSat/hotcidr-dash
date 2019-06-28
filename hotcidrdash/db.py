@@ -7,6 +7,7 @@ from hotcidrdash import util
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cp.db'
 sql = SQLAlchemy(app)
 
+
 class AWS(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
     slug = sql.Column(sql.String(80), unique=True)
@@ -57,11 +58,9 @@ class Configuration(sql.Model):
     disp = sql.Column(sql.Text)
 
     aws_id = sql.Column(sql.Integer, sql.ForeignKey(AWS.id))
-    aws = sql.relationship('AWS',
-            backref=sql.backref('configurations', lazy='dynamic'))
+    aws = sql.relationship('AWS', backref=sql.backref('configurations', lazy='dynamic'))
     git_id = sql.Column(sql.Integer, sql.ForeignKey(GitHub.id))
-    git = sql.relationship('GitHub',
-            backref=sql.backref('configurations', lazy='dynamic'))
+    git = sql.relationship('GitHub', backref=sql.backref('configurations', lazy='dynamic'))
     aws_vpc = sql.Column(sql.String(80))
     git_repo = sql.Column(sql.String(80))
     aws_region = sql.Column(sql.String(80))
@@ -89,8 +88,7 @@ class Configuration(sql.Model):
 class ApplyJob(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
     config_id = sql.Column(sql.Integer, sql.ForeignKey(Configuration.id))
-    config = sql.relationship('Configuration',
-            backref=sql.backref('apply_outputs', lazy='dynamic'))
+    config = sql.relationship('Configuration', backref=sql.backref('apply_outputs', lazy='dynamic'))
 
     title = sql.Column(sql.Text)
 
@@ -127,8 +125,7 @@ class ApplyJob(sql.Model):
 class AuditJob(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
     config_id = sql.Column(sql.Integer, sql.ForeignKey(Configuration.id))
-    config = sql.relationship('Configuration',
-            backref=sql.backref('audit_outputs', lazy='dynamic'))
+    config = sql.relationship('Configuration', backref=sql.backref('audit_outputs', lazy='dynamic'))
 
     start = sql.Column(sql.DateTime)
     end = sql.Column(sql.DateTime)
